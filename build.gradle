@@ -1,0 +1,111 @@
+apply plugin: 'java'
+apply plugin: 'java-library'
+apply plugin: 'maven-publish'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {
+    	url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+        credentials {
+        	username = System.getenv("GITHUB_DEPLOY_USER") ?: System.properties['deploy.user']
+            password = System.getenv("GITHUB_DEPLOY_TOKEN") ?: System.properties['deploy.token'] 
+		}
+	}
+}
+
+ext {
+    libraryRepo  = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+    patchVersion = System.getenv("ADEMPIERE_LIBRARY_VERSION") ?: "local-1.0.0"
+    baseVersion  = "3.9.4.001"
+    baseGroupId  = "io.github.adempiere"
+    publishGroupId  = "io.github.adempiere"
+}
+
+sourceCompatibility = 1.11
+
+dependencies {
+    api fileTree(
+        dir: 'lib',
+        include: [
+            '*.jar'
+        ]
+    )
+   	//	Patches Libraries
+    api project(':adempiere-patches.base')
+   	// api project(':adempiere-patches.adempiere.test')
+   	// api project(':adempiere-patches.asset')
+   	// api project(':adempiere-patches.cashflow')
+   	// api project(':adempiere-patches.crm')
+   	// api project(':adempiere-patches.discord-notifier')
+   	// api project(':adempiere-patches.distribution')
+   	// api project(':adempiere-patches.extend')
+   	// api project(':adempiere-patches.freight')
+   	// api project(':adempiere-patches.human-resource-and-payroll')
+   	// api project(':adempiere-patches.investment-and-loan')
+   	// api project(':adempiere-patches.jasperreports')
+   	// api project(':adempiere-patches.loan')
+   	// api project(':adempiere-patches.manufacturing')
+   	// api project(':adempiere-patches.migration')
+   	// api project(':adempiere-patches.openid-authentication')
+   	// api project(':adempiere-patches.point-of-sales')
+   	// api project(':adempiere-patches.production')
+   	// api project(':adempiere-patches.project')
+   	// api project(':adempiere-patches.request')
+   	// api project(':adempiere-patches.store')
+   	// api project(':adempiere-patches.telegram-notifier')
+   	// api project(':adempiere-patches.time-and-attendance')
+   	// api project(':adempiere-patches.tools')
+   	// api project(':adempiere-patches.wms')
+   	
+}
+
+jar {
+	manifest {
+		attributes(
+			"Implementation-Title": "ADempiere Patch",
+			"Implementation-Version": patchVersion
+		)
+    }
+}
+
+
+publishing {
+    repositories {
+		mavenLocal()
+        maven {
+            url = libraryRepo
+            credentials {
+                username = System.getenv("GITHUB_DEPLOY_USER") ?: System.properties['deploy.user']
+                password = System.getenv("GITHUB_DEPLOY_TOKEN") ?: System.properties['deploy.token'] 
+            }
+        }
+    }
+    
+    publications {
+        maven(MavenPublication) {
+			groupId = publishGroupId
+			artifactId = 'adempiere-patches'
+			version = patchVersion
+           	from components.java
+           	pom {
+                name = 'Adempiere Patches'
+                description = 'Project for Adempiere Patches'
+                url = 'http://adempiere.io/'
+                licenses {
+                    license {
+                        name = 'GNU General Public License, version 2'
+                        url = 'https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'cparada'
+                        name = 'Carlos Parada'
+                        email = 'cparada@erpya.com'
+                    }
+                }
+            }
+		}
+	}
+}

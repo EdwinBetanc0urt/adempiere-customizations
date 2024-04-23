@@ -1,0 +1,101 @@
+apply plugin: 'java'
+apply plugin: 'java-library'
+apply plugin: 'maven-publish'
+
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+sourceCompatibility = 1.11
+def packageName = "base"
+
+dependencies {
+    api fileTree(
+        dir: 'lib',
+        include: [
+            '*.jar'
+        ]
+    )
+    
+	//	ADempiere Core
+	api "${baseGroupId}:${packageName}:${baseVersion}"
+	// https://mvnrepository.com/artifact/org.apache.poi/poi
+	implementation 'org.apache.poi:poi:3.17'
+	// https://mvnrepository.com/artifact/commons-validator/commons-validator
+	implementation 'commons-validator:commons-validator:1.7'
+	implementation 'io.vavr:vavr:0.10.4'
+	implementation 'net.sourceforge.barbecue:barbecue:1.5-beta1'
+	// https://mvnrepository.com/artifact/io.konik/harness
+    implementation group: 'io.konik', name: 'harness', version: '1.0.0'
+	
+}
+
+
+sourceSets {
+    main {
+         java {
+            srcDirs = ['src/main/java/']
+         }
+    }
+}
+
+jar {
+	manifest {
+		attributes(
+			"Implementation-Title": "ADempiere Patch ${packageName}",
+			"Implementation-Version": patchVersion
+		)
+    }
+}
+
+configurations {
+   all*.exclude group: 'xml-apis'
+}
+
+publishing {
+    repositories {
+		mavenLocal()
+        maven {
+            url = libraryRepo
+            credentials {
+                username = System.getenv("GITHUB_DEPLOY_USER") ?: System.properties['deploy.user']
+                password = System.getenv("GITHUB_DEPLOY_TOKEN") ?: System.properties['deploy.token'] 
+            }
+        }
+    }
+    publications {
+        maven(MavenPublication) {
+			groupId = publishGroupId
+			artifactId = 'adempiere-patches.' + packageName
+			version = patchVersion
+           	from components.java
+           	pom {
+                name = 'Adempiere Patch ${packageName}'
+                description = 'Project for Patches ${packageName}'
+                url = 'http://adempiere.io/'
+                licenses {
+                    license {
+                        name = 'GNU General Public License, version 2'
+                        url = 'https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'cParada'
+                        name = 'Carlos Parada'
+                        email = 'cparada@erpya.com'
+                    }
+                }
+            }
+		}
+	}
+}
