@@ -1,6 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'java-library'
 apply plugin: 'maven-publish'
+apply plugin: 'signing'
 
 repositories {
     mavenLocal()
@@ -69,24 +70,23 @@ jar {
     }
 }
 
-
 publishing {
     repositories {
 		mavenLocal()
+
         maven {
-            url = libraryRepo
+            url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
             credentials {
-                username = System.getenv("GITHUB_DEPLOY_USER") ?: System.properties['deploy.user']
-                password = System.getenv("GITHUB_DEPLOY_TOKEN") ?: System.properties['deploy.token'] 
+                username = findProperty("sonatypeUsername")
+                password = findProperty("sonatypePassword")
             }
         }
     }
-    
     publications {
-        maven(MavenPublication) {
+        mavenJava(MavenPublication) {
 			groupId = publishGroupId
 			artifactId = 'adempiere-patches'
-			version = patchVersion
+			version = version
            	from components.java
            	pom {
                 name = 'Adempiere Patches'
@@ -100,12 +100,40 @@ publishing {
                 }
                 developers {
                     developer {
-                        id = 'cparada'
-                        name = 'Carlos Parada'
-                        email = 'cparada@erpya.com'
+                        id = 'yamelsenih'
+                        name = 'Yamel Senih'
+                        email = 'ysenih@erpya.com'
                     }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/adempiere/adempiere-payroll-multi-engine.git'
+                    developerConnection = 'scm:git:ssh://github.com/adempiere/adempiere-payroll-multi-engine.git'
+                    url = 'http://github.com/adempiere/adempiere-payroll-multi-engine'
                 }
             }
 		}
 	}
+}
+
+task cleanBuildPublishLocal(type: GradleBuild) {
+	tasks = ['clean', 'build', 'publishToMavenLocal']
+}
+
+
+signing {
+	def isReleaseVersion = !version.toString().startsWith("local") && !version.toString().endsWith("-SNAPSHOT")
+
+	sign configurations.archives
+
+	setRequired {
+		// signing is required if this is a release version and the artifacts are to be published
+		// do not use hasTask() as this require realization of the tasks that maybe are not necessary
+		(isReleaseVersion || version.toString().equals("build")) && gradle.taskGraph.allTasks.any {
+			it.equals(PublishToMavenRepository)
+		}
+	}
+	def signingKey = findProperty("signingKey")
+    def signingPassword = findProperty("signingPassword")
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign publishing.publications.mavenJava
 }
