@@ -78,7 +78,7 @@ publishing {
         mavenJava(MavenPublication) {
 			groupId = publishGroupId
 			artifactId = 'adempiere-patches.' + packageName
-			version = version
+			version = patchVersion
            	from components.java
            	pom {
                 name = 'Adempiere Patch ${packageName}'
