@@ -141,7 +141,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
 			groupId = publishGroupId
-			artifactId = 'adempiere-patches.' + packageName
+			artifactId = 'adempiere-customizations.' + packageName
 			version = patchVersion
            	from components.java
            	pom {
