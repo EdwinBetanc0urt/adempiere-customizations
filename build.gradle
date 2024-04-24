@@ -33,31 +33,31 @@ dependencies {
         ]
     )
    	//	Patches Libraries
-    api project(':adempiere-patches.base')
-   	// api project(':adempiere-patches.adempiere.test')
-   	// api project(':adempiere-patches.asset')
-   	// api project(':adempiere-patches.cashflow')
-   	// api project(':adempiere-patches.crm')
-   	// api project(':adempiere-patches.discord-notifier')
-   	// api project(':adempiere-patches.distribution')
-   	// api project(':adempiere-patches.extend')
-   	// api project(':adempiere-patches.freight')
-   	// api project(':adempiere-patches.human-resource-and-payroll')
-   	// api project(':adempiere-patches.investment-and-loan')
-   	// api project(':adempiere-patches.jasperreports')
-   	// api project(':adempiere-patches.loan')
-   	// api project(':adempiere-patches.manufacturing')
-   	// api project(':adempiere-patches.migration')
-   	// api project(':adempiere-patches.openid-authentication')
-   	// api project(':adempiere-patches.point-of-sales')
-   	// api project(':adempiere-patches.production')
-   	// api project(':adempiere-patches.project')
-   	// api project(':adempiere-patches.request')
-   	// api project(':adempiere-patches.store')
-   	// api project(':adempiere-patches.telegram-notifier')
-   	// api project(':adempiere-patches.time-and-attendance')
-   	// api project(':adempiere-patches.tools')
-   	// api project(':adempiere-patches.wms')
+    api project(':adempiere-customizations.base')
+   	// api project(':adempiere-customizations.adempiere.test')
+   	// api project(':adempiere-customizations.asset')
+   	// api project(':adempiere-customizations.cashflow')
+   	// api project(':adempiere-customizations.crm')
+   	// api project(':adempiere-customizations.discord-notifier')
+   	// api project(':adempiere-customizations.distribution')
+   	// api project(':adempiere-customizations.extend')
+   	// api project(':adempiere-customizations.freight')
+   	// api project(':adempiere-customizations.human-resource-and-payroll')
+   	// api project(':adempiere-customizations.investment-and-loan')
+   	// api project(':adempiere-customizations.jasperreports')
+   	// api project(':adempiere-customizations.loan')
+   	// api project(':adempiere-customizations.manufacturing')
+   	// api project(':adempiere-customizations.migration')
+   	// api project(':adempiere-customizations.openid-authentication')
+   	// api project(':adempiere-customizations.point-of-sales')
+   	// api project(':adempiere-customizations.production')
+   	// api project(':adempiere-customizations.project')
+   	// api project(':adempiere-customizations.request')
+   	// api project(':adempiere-customizations.store')
+   	// api project(':adempiere-customizations.telegram-notifier')
+   	// api project(':adempiere-customizations.time-and-attendance')
+   	// api project(':adempiere-customizations.tools')
+   	// api project(':adempiere-customizations.wms')
    	
 }
 
@@ -85,7 +85,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
 			groupId = publishGroupId
-			artifactId = 'adempiere-patches'
+			artifactId = 'adempiere-customizations'
 			version = patchVersion
            	from components.java
            	pom {
