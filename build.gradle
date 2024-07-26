@@ -59,7 +59,7 @@ jar {
 	manifest {
 		attributes(
 			"Implementation-Title": "ADempiere Patch",
-			"Implementation-Version": patchVersion
+			"Implementation-Version": version,
 			"EntityType": entityType
 		)
     }
