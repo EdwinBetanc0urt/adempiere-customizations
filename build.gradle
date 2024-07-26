@@ -52,7 +52,7 @@ dependencies {
 }
 
 def entityType = 'P'
-publishGroupId = "io.github.adempiere"
+group = "io.github.adempiere"
 version = findProperty("deployVersion") ?: "local-1.0.0"
 
 jar {
@@ -79,7 +79,7 @@ publishing {
     }
     publications {
         mavenJava(MavenPublication) {
-			groupId = publishGroupId
+			groupId = group
 			artifactId = 'adempiere-customizations'
 			version = version
            	from components.java
