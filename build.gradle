@@ -9,10 +9,8 @@ repositories {
 }
 
 ext {
-    patchVersion = System.getenv("ADEMPIERE_LIBRARY_VERSION") ?: "local-1.0.0"
     baseVersion  = "3.9.4.001"
     baseGroupId  = "io.github.adempiere"
-    publishGroupId  = "io.github.adempiere"
 }
 
 sourceCompatibility = 1.11
@@ -53,11 +51,16 @@ dependencies {
    	
 }
 
+def entityType = 'P'
+group = "io.github.adempiere"
+version = findProperty("deployVersion") ?: "local-1.0.0"
+
 jar {
 	manifest {
 		attributes(
 			"Implementation-Title": "ADempiere Patch",
 			"Implementation-Version": patchVersion
+			"EntityType": entityType
 		)
     }
 }
@@ -78,7 +81,7 @@ publishing {
         mavenJava(MavenPublication) {
 			groupId = publishGroupId
 			artifactId = 'adempiere-customizations'
-			version = patchVersion
+			version = version
            	from components.java
            	pom {
                 name = 'Adempiere Patches'
