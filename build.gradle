@@ -52,7 +52,7 @@ dependencies {
 }
 
 def entityType = 'P'
-group = "io.github.adempiere"
+publishGroupId = "io.github.adempiere"
 version = findProperty("deployVersion") ?: "local-1.0.0"
 
 jar {
