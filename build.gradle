@@ -3,6 +3,13 @@ apply plugin: 'java-library'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
+java {
+	sourceCompatibility = JavaVersion.VERSION_11
+	// targetCompatibility = JavaVersion.VERSION_17
+	withJavadocJar()
+	withSourcesJar()
+}
+
 repositories {
     mavenLocal()
     mavenCentral()
@@ -14,8 +21,6 @@ ext {
     baseGroupId  = "io.github.adempiere"
     publishGroupId  = "io.github.adempiere"
 }
-
-sourceCompatibility = 1.11
 
 dependencies {
     api fileTree(
@@ -59,7 +64,7 @@ jar {
 			"Implementation-Title": "ADempiere Patch",
 			"Implementation-Version": patchVersion
 		)
-    }
+	}
 }
 
 publishing {
