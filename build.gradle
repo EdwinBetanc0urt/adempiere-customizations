@@ -20,8 +20,8 @@ allprojects {
 }
 
 repositories {
-    mavenLocal()
-    mavenCentral()
+	mavenLocal()
+	mavenCentral()
 	maven {
 		// Custom GitHub Repository (ADempiere-Customizations by Default)
 		url = findProperty("deployRepository") ?: System.properties['deploy.repository'] ?:
