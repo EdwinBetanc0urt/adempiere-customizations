@@ -54,12 +54,12 @@ ext {
 
 	// project property, system property, .env project file, system enviroment variable
 	patchVersion = findProperty("deployVersion") ?: System.properties['deploy.version'] ?:
-	projectEnv.get("GITHUB_DEPLOY_VERSION", null) ?: System.getenv("ADEMPIERE_LIBRARY_VERSION") ?:
-	"local-1.0.0"
+		projectEnv.get("GITHUB_DEPLOY_VERSION", null) ?: System.getenv("ADEMPIERE_LIBRARY_VERSION") ?:
+		"local-1.0.0"
 	// project property, system property, .env project file, system enviroment variable
 	publishGroupId = findProperty("deployGroup") ?: System.properties['deploy.group'] ?:
-	projectEnv.get("GITHUB_DEPLOY_GROUP", null) ?: System.getenv("ADEMPIERE_LIBRARY_GROUP") ?:
-	"io.github.adempiere"
+		projectEnv.get("GITHUB_DEPLOY_GROUP", null) ?: System.getenv("ADEMPIERE_LIBRARY_GROUP") ?:
+		"io.github.adempiere"
 }
 
 dependencies {
