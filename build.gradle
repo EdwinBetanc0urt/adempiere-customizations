@@ -42,17 +42,19 @@ repositories {
 	}
 }
 
-def baseVersion = "3.9.4.001"
-def baseGroupId = "io.github.adempiere"
+ext {
+	baseVersion = "3.9.4.001"
+	baseGroupId = "io.github.adempiere"
 
-// project property, system property, .env project file, system enviroment variable
-def patchVersion = findProperty("deployVersion") ?: System.properties['deploy.version'] ?:
+	// project property, system property, .env project file, system enviroment variable
+	patchVersion = findProperty("deployVersion") ?: System.properties['deploy.version'] ?:
 	projectEnv.get("GITHUB_DEPLOY_VERSION", null) ?: System.getenv("GITHUB_DEPLOY_VERSION") ?:
 	"local-1.0.0"
-// project property, system property, .env project file, system enviroment variable
-def publishGroupId = findProperty("deployGroup") ?: System.properties['deploy.group'] ?:
+	// project property, system property, .env project file, system enviroment variable
+	publishGroupId = findProperty("deployGroup") ?: System.properties['deploy.group'] ?:
 	projectEnv.get("GITHUB_DEPLOY_GROUP", null) ?: System.getenv("GITHUB_DEPLOY_GROUP") ?:
 	"io.github.adempiere"
+}
 
 dependencies {
     api fileTree(
