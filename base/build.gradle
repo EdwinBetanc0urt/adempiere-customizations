@@ -142,7 +142,7 @@ publishing {
 			// Adempiere GitHub Organization by Default
 			url = findProperty("deployPublishUrl") ?: System.properties['deploy.publish_url'] ?:
 				projectEnv.get("GITHUB_DEPLOY_URL", null) ?: System.getenv("GITHUB_DEPLOY_URL") ?:
-				"https://maven.pkg.github.com/adempiere/adempiere"
+				"https://maven.pkg.github.com/adempiere/adempiere-customizations"
 			credentials {
 				username = findProperty("deployUsername") ?: System.properties['deploy.user']
 				password = findProperty("deployToken") ?: System.properties['deploy.token']

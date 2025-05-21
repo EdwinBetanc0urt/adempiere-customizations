@@ -120,6 +120,7 @@ jobs:
         env:
           ORG_GRADLE_PROJECT_deployVersion: ${{ github.event.release.tag_name }}
           ORG_GRADLE_PROJECT_deployGroup: ${{ secrets.DEPLOY_PUBLISH_GROUP }}
+          ORG_GRADLE_PROJECT_deployPublishUrl: ${{ secrets.DEPLOY_PUBLISH_GITHUB_URL }}
           ORG_GRADLE_PROJECT_deployUsername: ${{ secrets.DEPLOY_USER }}
           ORG_GRADLE_PROJECT_deployToken: ${{ secrets.DEPLOY_TOKEN }}
           ORG_GRADLE_PROJECT_deplyRepository: ${{ secrets.DEPLOY_REPOSITORY }}
