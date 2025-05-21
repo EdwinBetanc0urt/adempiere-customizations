@@ -3,7 +3,7 @@
 
 name: Publish With gradle to maven central
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the develop branch
   release:
@@ -13,8 +13,34 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
 
+  # Check secrets to publish sonatype registry
+  check-sonatype-secrets:
+    name: Check if the sonatype information was set on secrets and variables
+    runs-on: ubuntu-latest
+    outputs:
+      is_have_secrets: ${{ steps.check_sonatype_secrets_job.outputs.is_have_secrets }}
+    steps:
+      - id: check_sonatype_secrets_job
+        run: |
+          if [[ "${{ secrets.DEPLOY_PUBLISH_SONATYPE_URL }}" != "" && \
+                "${{ secrets.PGP_SECRET }}" != "" && \
+                "${{ secrets.PGP_PASSPHRASE }}" != "" && \
+                "${{ secrets.OSSRH_USERNAME }}" != "" && \
+                "${{ secrets.OSSRH_TOKEN }}" != "" ]]; \
+          then
+            echo "Secrets to use a container registry are configured in the repo"
+            echo "is_have_secrets=true" >> $GITHUB_OUTPUT
+          else
+            echo "Secrets to use a container registry were not configured in the repo"
+            echo "is_have_secrets=false" >> $GITHUB_OUTPUT
+          fi
+
   publish-sonatype:
     name: Publish Project (Sonatype)
+    needs:
+      - check-sonatype-secrets
+    # Skip step based on secret
+    if: needs.check-sonatype-secrets.outputs.is_have_secrets == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
@@ -37,13 +63,40 @@ jobs:
         run: gradle publish
         env:
           ORG_GRADLE_PROJECT_deployVersion: ${{ github.event.release.tag_name }}
+          ORG_GRADLE_PROJECT_deployGroup: ${{ secrets.DEPLOY_PUBLISH_GROUP }}
           ORG_GRADLE_PROJECT_deployPublishUrl: ${{ secrets.DEPLOY_PUBLISH_SONATYPE_URL }}
           ORG_GRADLE_PROJECT_deploySigningKey: ${{ secrets.PGP_SECRET }}
           ORG_GRADLE_PROJECT_deploySigningPassword: ${{ secrets.PGP_PASSPHRASE }}
           ORG_GRADLE_PROJECT_deployUsername: ${{ secrets.OSSRH_USERNAME }}
-          ORG_GRADLE_PROJECT_deployPassword: ${{ secrets.OSSRH_TOKEN }}
+          ORG_GRADLE_PROJECT_deployToken: ${{ secrets.OSSRH_TOKEN }}
+
+
+  # # Check secrets to publish github registry
+  check-github-secrets:
+    name: Check if the github information was set on secrets and variables
+    runs-on: ubuntu-latest
+    outputs:
+      is_have_secrets: ${{ steps.check_github_secrets_job.outputs.is_have_secrets }}
+    steps:
+      - id: check_github_secrets_job
+        run: |
+          if [[ "${{ secrets.DEPLOY_PUBLISH_GITHUB_URL }}" != "" && \
+                "${{ secrets.DEPLOY_USER }}" != "" && \
+                "${{ secrets.DEPLOY_TOKEN }}" != "" ]]; \
+          then
+            echo "Secrets to use a container registry are configured in the repo"
+            echo "is_have_secrets=true" >> $GITHUB_OUTPUT
+          else
+            echo "Secrets to use a container registry were not configured in the repo"
+            echo "is_have_secrets=false" >> $GITHUB_OUTPUT
+          fi
+
   publish-github:
-    name: Publish Project (Github)
+    name: Publish Project (GitHub)
+    needs:
+      - check-github-secrets
+    # # Skip step based on secret
+    if: needs.check-github-secrets.outputs.is_have_secrets == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
@@ -66,8 +119,11 @@ jobs:
         run: gradle publish
         env:
           ORG_GRADLE_PROJECT_deployVersion: ${{ github.event.release.tag_name }}
+          ORG_GRADLE_PROJECT_deployGroup: ${{ secrets.DEPLOY_PUBLISH_GROUP }}
           ORG_GRADLE_PROJECT_deployPublishUrl: ${{ secrets.DEPLOY_PUBLISH_GITHUB_URL }}
-          ORG_GRADLE_PROJECT_deploySigningKey: ${{ secrets.PGP_SECRET }}
-          ORG_GRADLE_PROJECT_deploySigningPassword: ${{ secrets.PGP_PASSPHRASE }}
-          ORG_GRADLE_PROJECT_deployUsername: "${{ github.actor }}"
-          ORG_GRADLE_PROJECT_deployPassword: "${{ secrets.DEPLOY_TOKEN }}"
+          ORG_GRADLE_PROJECT_deployUsername: ${{ secrets.DEPLOY_USER }}
+          ORG_GRADLE_PROJECT_deployToken: ${{ secrets.DEPLOY_TOKEN }}
+          ORG_GRADLE_PROJECT_deployRepository: ${{ secrets.DEPLOY_REPOSITORY }}
+          GITHUB_DEPLOY_USER: ${{ github.actor }}
+          GITHUB_DEPLOY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_DEPLOY_REPOSITORY: ${{ secrets.DEPLOY_REPOSITORY }}

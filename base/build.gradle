@@ -1,22 +1,55 @@
-apply plugin: 'java'
-apply plugin: 'java-library'
-apply plugin: 'maven-publish'
-apply plugin: 'signing'
-
 buildscript {
-  repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
-  }
+	repositories {
+		maven {
+		url "https://plugins.gradle.org/m2/"
+		}
+	}
+}
+
+plugins {
+	id "java"
+	id "java-library"
+	id "maven-publish"
+	id "signing"
+	id "io.github.uoxx3.project-environment" version "1.0.1"
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_11
+	// targetCompatibility = JavaVersion.VERSION_17
+	withJavadocJar()
+	withSourcesJar()
 }
 
 repositories {
-    mavenCentral()
-    mavenLocal()
+	mavenLocal()
+	mavenCentral()
+	maven {
+		// Custom GitHub Repository (ADempiere-Customizations by Default)
+		url = findProperty("deployRepository") ?: System.properties['deploy.repository'] ?:
+			projectEnv.get("GITHUB_DEPLOY_REPOSITORY", null) ?: System.getenv("GITHUB_DEPLOY_REPOSITORY") ?:
+			"https://maven.pkg.github.com/adempiere/adempiere-customizations"
+		credentials {
+			// project property, system property, .env project file, system enviroment variable
+			username = findProperty("deployUsername") ?: System.properties['deploy.user'] ?:
+				projectEnv.get("GITHUB_DEPLOY_USER", null) ?: System.getenv("GITHUB_DEPLOY_USER")
+			password = findProperty("deployToken") ?: System.properties['deploy.token'] ?:
+				projectEnv.get("GITHUB_DEPLOY_TOKEN", null) ?: System.getenv("GITHUB_DEPLOY_TOKEN")
+		}
+	}
+	maven {
+		// ADempiere organization maven github registry
+		url = "https://maven.pkg.github.com/adempiere/adempiere"
+		credentials {
+			// project property, system property, .env project file, system enviroment variable
+			username = findProperty("deployUsername") ?: System.properties['deploy.user'] ?:
+				projectEnv.get("GITHUB_DEPLOY_USER", null) ?: System.getenv("GITHUB_DEPLOY_USER")
+			password = findProperty("deployToken") ?: System.properties['deploy.token'] ?:
+				projectEnv.get("GITHUB_DEPLOY_TOKEN", null) ?: System.getenv("GITHUB_DEPLOY_TOKEN")
+		}
+	}
 }
 
-sourceCompatibility = 1.11
 def packageName = "base"
 
 dependencies {
@@ -26,7 +59,7 @@ dependencies {
             '*.jar'
         ]
     )
-    
+
 	//	ADempiere Core
 	api "${baseGroupId}:${packageName}:${baseVersion}"
 	// https://mvnrepository.com/artifact/org.apache.poi/poi
@@ -101,7 +134,6 @@ dependencies {
 	//	Temporary projects
 	//	Keycloak and Okta connector (Open-ID based)
 	api "${baseGroupId}:adempiere-open-id-connector:1.0.0"
-	
 }
 
 
@@ -130,13 +162,19 @@ publishing {
     repositories {
 		mavenLocal()
 
-        maven {
-            url = findProperty("deployPublishUrl") ?: System.properties['deploy.publish_url']
-            credentials {
-                username = findProperty("deployUsername") ?: System.properties['deploy.user']
-                password = findProperty("deployPassword") ?: System.properties['deploy.token']
-            }
-        }
+		maven {
+			// Adempiere GitHub Organization by Default
+			url = findProperty("deployPublishUrl") ?: System.properties['deploy.publish_url'] ?:
+				projectEnv.get("GITHUB_DEPLOY_URL", null) ?: System.getenv("GITHUB_DEPLOY_URL") ?:
+				"https://maven.pkg.github.com/adempiere/adempiere-customizations"
+			credentials {
+				// project property, system property, .env project file, system enviroment variable
+				username = findProperty("deployUsername") ?: System.properties['deploy.user'] ?:
+					projectEnv.get("GITHUB_DEPLOY_USER", null) ?: System.getenv("GITHUB_DEPLOY_USER")
+				password = findProperty("deployToken") ?: System.properties['deploy.token'] ?:
+					projectEnv.get("GITHUB_DEPLOY_TOKEN", null) ?: System.getenv("GITHUB_DEPLOY_TOKEN")
+			}
+		}
     }
     publications {
         mavenJava(MavenPublication) {
@@ -160,6 +198,11 @@ publishing {
                         name = 'Yamel Senih'
                         email = 'ysenih@erpya.com'
                     }
+					developer {
+						id = 'edwinbetanc0urt'
+						name = 'Edwin Betancourt'
+						email = 'EdwinBetanc0urt@outlook.com'
+					}
                 }
                 scm {
                     connection = 'scm:git:git://github.com/adempiere/adempiere-payroll-multi-engine.git'
@@ -177,19 +220,19 @@ task cleanBuildPublishLocal(type: GradleBuild) {
 
 
 signing {
-	def isReleaseVersion = !version.toString().startsWith("local") && !version.toString().endsWith("-SNAPSHOT")
+	def isReleaseVersion = !patchVersion.toString().startsWith("local") && !patchVersion.toString().endsWith("-SNAPSHOT")
 
 	sign configurations.archives
 
 	setRequired {
 		// signing is required if this is a release version and the artifacts are to be published
 		// do not use hasTask() as this require realization of the tasks that maybe are not necessary
-		(isReleaseVersion || version.toString().equals("build")) && gradle.taskGraph.allTasks.any {
+		(isReleaseVersion || patchVersion.toString().equals("build")) && gradle.taskGraph.allTasks.any {
 			it.equals(PublishToMavenRepository)
 		}
 	}
 	def signingKey = findProperty("signingKey")
-    def signingPassword = findProperty("signingPassword")
-    useInMemoryPgpKeys(signingKey, signingPassword)
-    sign publishing.publications.mavenJava
+	def signingPassword = findProperty("signingPassword")
+	useInMemoryPgpKeys(signingKey, signingPassword)
+	sign publishing.publications.mavenJava
 }
