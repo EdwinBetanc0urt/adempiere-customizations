@@ -11,3 +11,6 @@ gradle.properties
 gradlew*
 gradle-wrapper*
 /bin/
+
+# Enviroment variable file
+.env
