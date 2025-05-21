@@ -27,7 +27,7 @@ project (':' + rootProject.name + '.investment-and-loan').projectDir = file('inv
 ### To publish in GitHub packages
 
 - `DEPLOY_PUBLISH_GITHUB_URL`: The path where packages will be published in github, its default value is `https://maven.pkg.github.com/adempiere/adempiere-customizations`, it must be changed unless you have write permission in that space. As a good practice use the name of the organization and the name of the repository containing the patches.
-- `DEPLOY_REPOSITORY`: The path to the maven repository for downloading packages from github, it is not mandatory, default value is `https://maven.pkg.github.com/adempiere/adempiere`.
+- `DEPLOY_REPOSITORY`: The path to the maven custom repository for downloading packages from github, it is not mandatory, default value is `https://maven.pkg.github.com/adempiere/adempiere-customizations`.
 - `DEPLOY_USER`: The user name with write access to the package release repository.
 - `DEPLOY_TOKEN`: The token generated for the previously indicated user, it should be noted that he/she must have access to read and write packages.
 
