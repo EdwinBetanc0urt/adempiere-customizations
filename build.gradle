@@ -1,7 +1,10 @@
-apply plugin: 'java'
-apply plugin: 'java-library'
-apply plugin: 'maven-publish'
-apply plugin: 'signing'
+plugins {
+	id "java"
+	id "java-library"
+	id "maven-publish"
+	id "signing"
+	id "io.github.uoxx3.project-environment" version "1.0.1"
+}
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_11
@@ -13,14 +16,43 @@ java {
 repositories {
     mavenLocal()
     mavenCentral()
+	maven {
+		// Custom GitHub Repository (ADempiere by Default)
+		url = findProperty("deployRepository") ?: System.properties['deploy.repository'] ?:
+			projectEnv.get("GITHUB_DEPLOY_REPOSITORY", null) ?: System.getenv("GITHUB_DEPLOY_REPOSITORY") ?:
+			"https://maven.pkg.github.com/adempiere/adempiere"
+		credentials {
+			// project property, system property, .env project file, system enviroment variable
+			username = findProperty("deployUsername") ?: System.properties['deploy.user'] ?:
+				projectEnv.get("GITHUB_DEPLOY_USER", null) ?: System.getenv("GITHUB_DEPLOY_USER")
+			password = findProperty("deployToken") ?: System.properties['deploy.token'] ?:
+				projectEnv.get("GITHUB_DEPLOY_TOKEN", null) ?: System.getenv("GITHUB_DEPLOY_TOKEN")
+		}
+	}
+	maven {
+		// ADempiere organization maven github registry
+		url = "https://maven.pkg.github.com/adempiere/adempiere"
+		credentials {
+			// project property, system property, .env project file, system enviroment variable
+			username = findProperty("deployUsername") ?: System.properties['deploy.user'] ?:
+				projectEnv.get("GITHUB_DEPLOY_USER", null) ?: System.getenv("GITHUB_DEPLOY_USER")
+			password = findProperty("deployToken") ?: System.properties['deploy.token'] ?:
+				projectEnv.get("GITHUB_DEPLOY_TOKEN", null) ?: System.getenv("GITHUB_DEPLOY_TOKEN")
+		}
+	}
 }
 
-ext {
-	patchVersion = findProperty("deployVersion") ?: "local-1.0.0"
-    baseVersion  = "3.9.4.001"
-    baseGroupId  = "io.github.adempiere"
-    publishGroupId  = "io.github.adempiere"
-}
+def baseVersion = "3.9.4.001"
+def baseGroupId = "io.github.adempiere"
+
+// project property, system property, .env project file, system enviroment variable
+def patchVersion = findProperty("deployVersion") ?: System.properties['deploy.version'] ?:
+	projectEnv.get("GITHUB_DEPLOY_VERSION", null) ?: System.getenv("GITHUB_DEPLOY_VERSION") ?:
+	"local-1.0.0"
+// project property, system property, .env project file, system enviroment variable
+def publishGroupId = findProperty("deployGroup") ?: System.properties['deploy.group'] ?:
+	projectEnv.get("GITHUB_DEPLOY_GROUP", null) ?: System.getenv("GITHUB_DEPLOY_GROUP") ?:
+	"io.github.adempiere"
 
 dependencies {
     api fileTree(
@@ -29,6 +61,7 @@ dependencies {
             '*.jar'
         ]
     )
+
    	//	Patches Libraries
     api project(':adempiere-customizations.base')
    	// api project(':adempiere-customizations.adempiere.test')
@@ -55,7 +88,6 @@ dependencies {
    	// api project(':adempiere-customizations.time-and-attendance')
    	// api project(':adempiere-customizations.tools')
    	// api project(':adempiere-customizations.wms')
-   	
 }
 
 jar {
@@ -71,14 +103,20 @@ publishing {
     repositories {
 		mavenLocal()
 
-        maven {
-            url = findProperty("deployPublishUrl") ?: System.properties['deploy.publish_url']
-            credentials {
-                username = findProperty("deployUsername") ?: System.properties['deploy.user']
-                password = findProperty("deployPassword") ?: System.properties['deploy.token']
-            }
-        }
-    }
+		maven {
+			// Adempiere GitHub Organization by Default
+			url = findProperty("deployPublishUrl") ?: System.properties['deploy.publish_url'] ?:
+				projectEnv.get("GITHUB_DEPLOY_URL", null) ?: System.getenv("GITHUB_DEPLOY_URL") ?:
+				"https://maven.pkg.github.com/adempiere/adempiere"
+			credentials {
+				// project property, system property, .env project file, system enviroment variable
+				username = findProperty("deployUsername") ?: System.properties['deploy.user'] ?:
+					projectEnv.get("GITHUB_DEPLOY_USER", null) ?: System.getenv("GITHUB_DEPLOY_USER")
+				password = findProperty("deployToken") ?: System.properties['deploy.token'] ?:
+					projectEnv.get("GITHUB_DEPLOY_TOKEN", null) ?: System.getenv("GITHUB_DEPLOY_TOKEN")
+			}
+		}
+	}
     publications {
         mavenJava(MavenPublication) {
 			groupId = publishGroupId
@@ -101,7 +139,12 @@ publishing {
                         name = 'Yamel Senih'
                         email = 'ysenih@erpya.com'
                     }
-                }
+					developer {
+						id = 'edwinbetanc0urt'
+						name = 'Edwin Betancourt'
+						email = 'EdwinBetanc0urt@outlook.com'
+					}
+				}
                 scm {
                     connection = 'scm:git:git://github.com/adempiere/adempiere-payroll-multi-engine.git'
                     developerConnection = 'scm:git:ssh://github.com/adempiere/adempiere-payroll-multi-engine.git'
@@ -119,19 +162,19 @@ task cleanBuildPublishLocal(type: GradleBuild) {
 
 
 signing {
-	def isReleaseVersion = !version.toString().startsWith("local") && !version.toString().endsWith("-SNAPSHOT")
+	def isReleaseVersion = !patchVersion.toString().startsWith("local") && !patchVersion.toString().endsWith("-SNAPSHOT")
 
 	sign configurations.archives
 
 	setRequired {
 		// signing is required if this is a release version and the artifacts are to be published
 		// do not use hasTask() as this require realization of the tasks that maybe are not necessary
-		(isReleaseVersion || version.toString().equals("build")) && gradle.taskGraph.allTasks.any {
+		(isReleaseVersion || patchVersion.toString().equals("build")) && gradle.taskGraph.allTasks.any {
 			it.equals(PublishToMavenRepository)
 		}
 	}
 	def signingKey = findProperty("deploySigningKey")
-    def signingPassword = findProperty("deploySigningPassword")
-    useInMemoryPgpKeys(signingKey, signingPassword)
-    sign publishing.publications.mavenJava
+	def signingPassword = findProperty("deploySigningPassword")
+	useInMemoryPgpKeys(signingKey, signingPassword)
+	sign publishing.publications.mavenJava
 }
