@@ -14,16 +14,40 @@ plugins {
 	id "io.github.uoxx3.project-environment" version "1.0.1"
 }
 
-repositories {
-    mavenCentral()
-    mavenLocal()
-}
-
 java {
 	sourceCompatibility = JavaVersion.VERSION_11
 	// targetCompatibility = JavaVersion.VERSION_17
 	withJavadocJar()
 	withSourcesJar()
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+	maven {
+		// Custom GitHub Repository (ADempiere-Customizations by Default)
+		url = findProperty("deployRepository") ?: System.properties['deploy.repository'] ?:
+			projectEnv.get("GITHUB_DEPLOY_REPOSITORY", null) ?: System.getenv("GITHUB_DEPLOY_REPOSITORY") ?:
+			"https://maven.pkg.github.com/adempiere/adempiere-customizations"
+		credentials {
+			// project property, system property, .env project file, system enviroment variable
+			username = findProperty("deployUsername") ?: System.properties['deploy.user'] ?:
+				projectEnv.get("GITHUB_DEPLOY_USER", null) ?: System.getenv("GITHUB_DEPLOY_USER")
+			password = findProperty("deployToken") ?: System.properties['deploy.token'] ?:
+				projectEnv.get("GITHUB_DEPLOY_TOKEN", null) ?: System.getenv("GITHUB_DEPLOY_TOKEN")
+		}
+	}
+	maven {
+		// ADempiere organization maven github registry
+		url = "https://maven.pkg.github.com/adempiere/adempiere"
+		credentials {
+			// project property, system property, .env project file, system enviroment variable
+			username = findProperty("deployUsername") ?: System.properties['deploy.user'] ?:
+				projectEnv.get("GITHUB_DEPLOY_USER", null) ?: System.getenv("GITHUB_DEPLOY_USER")
+			password = findProperty("deployToken") ?: System.properties['deploy.token'] ?:
+				projectEnv.get("GITHUB_DEPLOY_TOKEN", null) ?: System.getenv("GITHUB_DEPLOY_TOKEN")
+		}
+	}
 }
 
 def packageName = "base"

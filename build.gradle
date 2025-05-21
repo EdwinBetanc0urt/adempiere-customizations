@@ -13,14 +13,20 @@ java {
 	withSourcesJar()
 }
 
+allprojects {
+	tasks.withType(Javadoc) {
+		options.addStringOption('Xdoclint:none', '-quiet')
+	}
+}
+
 repositories {
     mavenLocal()
     mavenCentral()
 	maven {
-		// Custom GitHub Repository (ADempiere by Default)
+		// Custom GitHub Repository (ADempiere-Customizations by Default)
 		url = findProperty("deployRepository") ?: System.properties['deploy.repository'] ?:
 			projectEnv.get("GITHUB_DEPLOY_REPOSITORY", null) ?: System.getenv("GITHUB_DEPLOY_REPOSITORY") ?:
-			"https://maven.pkg.github.com/adempiere/adempiere"
+			"https://maven.pkg.github.com/adempiere/adempiere-customizations"
 		credentials {
 			// project property, system property, .env project file, system enviroment variable
 			username = findProperty("deployUsername") ?: System.properties['deploy.user'] ?:
@@ -48,11 +54,11 @@ ext {
 
 	// project property, system property, .env project file, system enviroment variable
 	patchVersion = findProperty("deployVersion") ?: System.properties['deploy.version'] ?:
-	projectEnv.get("GITHUB_DEPLOY_VERSION", null) ?: System.getenv("GITHUB_DEPLOY_VERSION") ?:
+	projectEnv.get("GITHUB_DEPLOY_VERSION", null) ?: System.getenv("ADEMPIERE_LIBRARY_VERSION") ?:
 	"local-1.0.0"
 	// project property, system property, .env project file, system enviroment variable
 	publishGroupId = findProperty("deployGroup") ?: System.properties['deploy.group'] ?:
-	projectEnv.get("GITHUB_DEPLOY_GROUP", null) ?: System.getenv("GITHUB_DEPLOY_GROUP") ?:
+	projectEnv.get("GITHUB_DEPLOY_GROUP", null) ?: System.getenv("ADEMPIERE_LIBRARY_GROUP") ?:
 	"io.github.adempiere"
 }
 
