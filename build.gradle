@@ -19,20 +19,54 @@ allprojects {
 	}
 }
 
+ext {
+	baseVersion = "3.9.4.001"
+	baseGroupId = "io.github.adempiere"
+
+	// project property, system property, .env project file, system enviroment variable
+
+	// CUSTOMIZABLE DOWNLOAD REPOSITORY PACKAGES
+	customRepositoryUrl = findProperty("deployRepository") ?: System.properties['deploy.repository'] ?:
+		projectEnv.get("GITHUB_DEPLOY_REPOSITORY", null) ?: System.getenv("GITHUB_DEPLOY_REPOSITORY") ?:
+		"https://maven.pkg.github.com/adempiere/adempiere-customizations"
+
+	customRepositoryUserName = findProperty("deployUsername") ?: System.properties['deploy.user'] ?:
+		projectEnv.get("GITHUB_DEPLOY_USER", null) ?: System.getenv("GITHUB_DEPLOY_USER")
+
+	customRepositoryToken = findProperty("deployToken") ?: System.properties['deploy.token'] ?:
+		projectEnv.get("GITHUB_DEPLOY_TOKEN", null) ?: System.getenv("GITHUB_DEPLOY_TOKEN")
+
+
+	// PUBLISH REPOSITORY PACKAGES
+	patchPublishUrl = findProperty("deployPublishUrl") ?: System.properties['deploy.publish_url'] ?:
+		projectEnv.get("GITHUB_DEPLOY_URL", null) ?: System.getenv("GITHUB_DEPLOY_URL") ?:
+		"https://maven.pkg.github.com/adempiere/adempiere-customizations"
+
+	patchPublishUserName = findProperty("deployUsername") ?: System.properties['deploy.user'] ?:
+		projectEnv.get("GITHUB_DEPLOY_USER", null) ?: System.getenv("GITHUB_DEPLOY_USER")
+
+	patchPublishToken = findProperty("deployToken") ?: System.properties['deploy.token'] ?:
+		projectEnv.get("GITHUB_DEPLOY_TOKEN", null) ?: System.getenv("GITHUB_DEPLOY_TOKEN")
+
+	patchPublishVersion = findProperty("deployVersion") ?: System.properties['deploy.version'] ?:
+		projectEnv.get("GITHUB_DEPLOY_VERSION", null) ?: System.getenv("ADEMPIERE_LIBRARY_VERSION") ?:
+		"local-1.0.0"
+
+	patchPublishGroupId = findProperty("deployGroup") ?: System.properties['deploy.group'] ?:
+		projectEnv.get("GITHUB_DEPLOY_GROUP", null) ?: System.getenv("ADEMPIERE_LIBRARY_GROUP") ?:
+		"io.github.adempiere"
+}
+
 repositories {
 	mavenLocal()
 	mavenCentral()
 	maven {
 		// Custom GitHub Repository (ADempiere-Customizations by Default)
-		url = findProperty("deployRepository") ?: System.properties['deploy.repository'] ?:
-			projectEnv.get("GITHUB_DEPLOY_REPOSITORY", null) ?: System.getenv("GITHUB_DEPLOY_REPOSITORY") ?:
-			"https://maven.pkg.github.com/adempiere/adempiere-customizations"
+		url = customRepositoryUrl
 		credentials {
 			// project property, system property, .env project file, system enviroment variable
-			username = findProperty("deployUsername") ?: System.properties['deploy.user'] ?:
-				projectEnv.get("GITHUB_DEPLOY_USER", null) ?: System.getenv("GITHUB_DEPLOY_USER")
-			password = findProperty("deployToken") ?: System.properties['deploy.token'] ?:
-				projectEnv.get("GITHUB_DEPLOY_TOKEN", null) ?: System.getenv("GITHUB_DEPLOY_TOKEN")
+			username = customRepositoryUserName
+			password = customRepositoryToken
 		}
 	}
 	maven {
@@ -46,20 +80,6 @@ repositories {
 				projectEnv.get("GITHUB_DEPLOY_TOKEN", null) ?: System.getenv("GITHUB_DEPLOY_TOKEN")
 		}
 	}
-}
-
-ext {
-	baseVersion = "3.9.4.001"
-	baseGroupId = "io.github.adempiere"
-
-	// project property, system property, .env project file, system enviroment variable
-	patchVersion = findProperty("deployVersion") ?: System.properties['deploy.version'] ?:
-		projectEnv.get("GITHUB_DEPLOY_VERSION", null) ?: System.getenv("ADEMPIERE_LIBRARY_VERSION") ?:
-		"local-1.0.0"
-	// project property, system property, .env project file, system enviroment variable
-	publishGroupId = findProperty("deployGroup") ?: System.properties['deploy.group'] ?:
-		projectEnv.get("GITHUB_DEPLOY_GROUP", null) ?: System.getenv("ADEMPIERE_LIBRARY_GROUP") ?:
-		"io.github.adempiere"
 }
 
 dependencies {
@@ -98,11 +118,12 @@ dependencies {
    	// api project(':adempiere-customizations.wms')
 }
 
+
 jar {
 	manifest {
 		attributes(
 			"Implementation-Title": "ADempiere Patch",
-			"Implementation-Version": patchVersion
+			"Implementation-Version": patchPublishVersion
 		)
 	}
 }
@@ -113,25 +134,21 @@ publishing {
 
 		maven {
 			// Adempiere GitHub Organization by Default
-			url = findProperty("deployPublishUrl") ?: System.properties['deploy.publish_url'] ?:
-				projectEnv.get("GITHUB_DEPLOY_URL", null) ?: System.getenv("GITHUB_DEPLOY_URL") ?:
-				"https://maven.pkg.github.com/adempiere/adempiere-customizations"
+			url = patchPublishUrl
 			credentials {
 				// project property, system property, .env project file, system enviroment variable
-				username = findProperty("deployUsername") ?: System.properties['deploy.user'] ?:
-					projectEnv.get("GITHUB_DEPLOY_USER", null) ?: System.getenv("GITHUB_DEPLOY_USER")
-				password = findProperty("deployToken") ?: System.properties['deploy.token'] ?:
-					projectEnv.get("GITHUB_DEPLOY_TOKEN", null) ?: System.getenv("GITHUB_DEPLOY_TOKEN")
+				username = patchPublishUserName
+				password = patchPublishToken
 			}
 		}
 	}
-    publications {
-        mavenJava(MavenPublication) {
-			groupId = publishGroupId
+	publications {
+		mavenJava(MavenPublication) {
+			groupId = patchPublishGroupId
 			artifactId = 'adempiere-customizations'
-			version = patchVersion
-           	from components.java
-           	pom {
+			version = patchPublishVersion
+			from components.java
+			pom {
                 name = 'Adempiere Patches'
                 description = 'Project for Adempiere Patches'
                 url = 'http://adempiere.io/'
@@ -153,12 +170,12 @@ publishing {
 						email = 'EdwinBetanc0urt@outlook.com'
 					}
 				}
-                scm {
-                    connection = 'scm:git:git://github.com/adempiere/adempiere-payroll-multi-engine.git'
-                    developerConnection = 'scm:git:ssh://github.com/adempiere/adempiere-payroll-multi-engine.git'
-                    url = 'http://github.com/adempiere/adempiere-payroll-multi-engine'
-                }
-            }
+				scm {
+					connection = 'scm:git:git://github.com/adempiere/adempiere-customizations.git'
+					developerConnection = 'scm:git:ssh://github.com/adempiere/adempiere-customizations.git'
+					url = 'http://github.com/adempiere/adempiere-customizations'
+				}
+			}
 		}
 	}
 }
@@ -170,14 +187,14 @@ task cleanBuildPublishLocal(type: GradleBuild) {
 
 
 signing {
-	def isReleaseVersion = !patchVersion.toString().startsWith("local") && !patchVersion.toString().endsWith("-SNAPSHOT")
+	def isReleaseVersion = !patchPublishVersion.toString().startsWith("local") && !patchPublishVersion.toString().endsWith("-SNAPSHOT")
 
 	sign configurations.archives
 
 	setRequired {
 		// signing is required if this is a release version and the artifacts are to be published
 		// do not use hasTask() as this require realization of the tasks that maybe are not necessary
-		(isReleaseVersion || patchVersion.toString().equals("build")) && gradle.taskGraph.allTasks.any {
+		(isReleaseVersion || patchPublishVersion.toString().equals("build")) && gradle.taskGraph.allTasks.any {
 			it.equals(PublishToMavenRepository)
 		}
 	}
