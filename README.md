@@ -22,7 +22,7 @@ project (':' + rootProject.name + '.investment-and-loan').projectDir = file('inv
 ## Repository secrets
 
 ### General
-- `DEPLOY_PUBLISH_GROUP`: Sets the group to publish, it is not mandatory, its default value is `io.github.adempiere`.
+- `DEPLOY_PUBLISH_GROUP`: Sets the group to publish, it is mandatory, its default value is `io.github.adempiere`. See https://docs.oracle.com/javase/tutorial/java/package/namingpkgs.html for more information.
 
 ### To publish in GitHub packages
 
