@@ -3,6 +3,10 @@
 
 name: Publish With gradle to maven central
 
+permissions:
+  contents: write # to upload release assets
+  packages: write # to publish packages
+
 # Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the develop branch
@@ -57,14 +61,14 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: current # 9.0.0
+          gradle-version: 9.0.0 # current
 
       - name: Build with Gradle
-        run: gradle publish
+        run: gradle publish --warning-mode all --stacktrace
         env:
           ORG_GRADLE_PROJECT_deployVersion: ${{ github.event.release.tag_name }}
-          ORG_GRADLE_PROJECT_deployGroup: ${{ secrets.DEPLOY_PUBLISH_GROUP }}
-          ORG_GRADLE_PROJECT_deployPublishUrl: ${{ secrets.DEPLOY_PUBLISH_SONATYPE_URL }}
+          ORG_GRADLE_PROJECT_deployGroup: ${{ vars.DEPLOY_PUBLISH_GROUP }}
+          ORG_GRADLE_PROJECT_deployPublishUrl: ${{ vars.DEPLOY_PUBLISH_SONATYPE_URL }}
           ORG_GRADLE_PROJECT_deploySigningKey: ${{ secrets.PGP_SECRET }}
           ORG_GRADLE_PROJECT_deploySigningPassword: ${{ secrets.PGP_PASSPHRASE }}
           ORG_GRADLE_PROJECT_deployUsername: ${{ secrets.OSSRH_USERNAME }}
@@ -80,7 +84,7 @@ jobs:
     steps:
       - id: check_github_secrets_job
         run: |
-          if [[ "${{ secrets.DEPLOY_PUBLISH_GITHUB_URL }}" != "" && \
+          if [[ "${{ vars.DEPLOY_PUBLISH_GITHUB_URL }}" != "" && \
                 "${{ secrets.DEPLOY_USER }}" != "" && \
                 "${{ secrets.DEPLOY_TOKEN }}" != "" ]]; \
           then
@@ -113,17 +117,20 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: current # 9.0.0
+          gradle-version: 9.0.0 # current
 
       - name: Build with Gradle
-        run: gradle publish
+        run: gradle publish --warning-mode all --stacktrace
         env:
           ORG_GRADLE_PROJECT_deployVersion: ${{ github.event.release.tag_name }}
-          ORG_GRADLE_PROJECT_deployGroup: ${{ secrets.DEPLOY_PUBLISH_GROUP }}
-          ORG_GRADLE_PROJECT_deployPublishUrl: ${{ secrets.DEPLOY_PUBLISH_GITHUB_URL }}
+          ORG_GRADLE_PROJECT_deployGroup: ${{ vars.DEPLOY_PUBLISH_GROUP }}
+          ORG_GRADLE_PROJECT_deployPublishUrl: ${{ vars.DEPLOY_PUBLISH_GITHUB_URL }}
           ORG_GRADLE_PROJECT_deployUsername: ${{ secrets.DEPLOY_USER }}
           ORG_GRADLE_PROJECT_deployToken: ${{ secrets.DEPLOY_TOKEN }}
-          ORG_GRADLE_PROJECT_deployRepository: ${{ secrets.DEPLOY_REPOSITORY }}
+          ORG_GRADLE_PROJECT_deployRepository: ${{ vars.DEPLOY_REPOSITORY }}
+          GITHUB_DEPLOY_VERSION: ${{ github.event.release.tag_name }}
+          GITHUB_DEPLOY_GROUP: ${{ vars.GITHUB_DEPLOY_GROUP }}
+          GITHUB_DEPLOY_URL: ${{ vars.DEPLOY_PUBLISH_GITHUB_URL }}
           GITHUB_DEPLOY_USER: ${{ github.actor }}
           GITHUB_DEPLOY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_DEPLOY_REPOSITORY: ${{ secrets.DEPLOY_REPOSITORY }}
+          GITHUB_DEPLOY_REPOSITORY: ${{ vars.DEPLOY_REPOSITORY }}

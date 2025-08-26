@@ -3,6 +3,10 @@
 
 name: Continuous Integration with Gradle
 
+permissions:
+  contents: write # to upload release assets
+  packages: write # to publish packages
+
 # Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the develop branch
@@ -11,11 +15,25 @@ on:
       - '*'         # matches every branch that doesn't contain a '/'
       - '*/*'       # matches every branch containing a single '/'
       - '**'        # matches every branch
+    paths-ignore:
+      - README.md
+      - README.es.md
+      - docker/*
+
   pull_request:
     branches:
-      - '*'         # matches every branch that doesn't contain a '/'
-      - '*/*'       # matches every branch containing a single '/'
-      - '**'        # matches every branch
+      - main
+      - master
+      - develop
+      - experimental
+      - bugfix/**
+      - feature/**
+      - hotfix/**
+      - test/**
+    paths-ignore:
+      - README.md
+      - README.es.md
+      - docker/*
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -38,15 +56,16 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: current # 9.0.0
+          gradle-version: 9.0.0 # current
 
       - name: Build with Gradle
-        run: gradle build
+        run: gradle build --warning-mode all --stacktrace
         env:
-          ADEMPIERE_LIBRARY_VERSION: 'build'
+          ORG_GRADLE_PROJECT_deployVersion: 'build'
           ORG_GRADLE_PROJECT_deployUsername: ${{ secrets.DEPLOY_USER }}
           ORG_GRADLE_PROJECT_deployToken: ${{ secrets.DEPLOY_TOKEN }}
-          ORG_GRADLE_PROJECT_deployRepository: ${{ secrets.DEPLOY_REPOSITORY }}
+          ORG_GRADLE_PROJECT_deployRepository: ${{ vars.DEPLOY_REPOSITORY }}
+          GITHUB_DEPLOY_VERSION: 'build'
           GITHUB_DEPLOY_USER: ${{ github.actor }}
           GITHUB_DEPLOY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_DEPLOY_REPOSITORY: ${{ secrets.DEPLOY_REPOSITORY }}
+          GITHUB_DEPLOY_REPOSITORY: ${{ vars.DEPLOY_REPOSITORY }}
